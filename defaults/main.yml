@@ -4,7 +4,8 @@ network_exporter_container_name: network_exporter
 network_exporter_image_name: syepes/network_exporter:latest
 network_exporter_hostname: network_exporter
 network_exporter_config_dir: /var/network_exporter
-network_exporter_expose_ports: localhost:9427:9427
+network_exporter_expose_ports:
+  - localhost:9427:9427
 network_exporter_extra_hosts: []
 network_exporter_config:
   targets:
