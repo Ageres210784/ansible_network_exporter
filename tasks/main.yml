@@ -1,0 +1,38 @@
+---
+- name: Ensure config directory
+  file:
+    state: directory
+    path: "{{ network_exporter_config_dir }}"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Ensure config file
+  ansible.builtin.copy:
+    content: |
+      {{ network_exporter_config | to_nice_yaml(indent=2) }}
+    dest: "{{ network_exporter_config_dir }}/network_exporter.yml"
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Restart network_exporter
+
+- name: Run container {{ network_exporter_container_name }}
+  community.docker.docker_compose_v2:
+    state: present
+    project_name: network_exporter
+    definition:
+      services:
+        network_exporter:
+          image: "{{ network_exporter_image_name }}"
+          container_name: "{{ network_exporter_container_name }}"
+          hostname: "{{ network_exporter_hostname }}"
+          restart: always
+          volumes:
+            - "{{ network_exporter_config_dir }}/network_exporter.yml:/app/cfg/network_exporter.yml:ro"
+          ports: "{{ network_exporter_expose_ports }}"
+          extra_hosts: "{{ network_exporter_extra_hosts }}"
+          cap_add:
+            - NET_RAW
+            - NET_ADMIN
